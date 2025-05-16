@@ -1,2 +1,7 @@
-D:\Cegep\ProjetPerso\JoltExamples\dummy\src\main\java\io\github\t1willi\controller\HomeController.java
-D:\Cegep\ProjetPerso\JoltExamples\dummy\src\main\java\io\github\t1willi\Main.java
+/Users/willi/Documents/perso/silver-palm-tree/src/main/java/io/github/t1willi/Main.java
+/Users/willi/Documents/perso/silver-palm-tree/src/main/java/io/github/t1willi/brokers/ApiKeysBroker.java
+/Users/willi/Documents/perso/silver-palm-tree/src/main/java/io/github/t1willi/brokers/UserBroker.java
+/Users/willi/Documents/perso/silver-palm-tree/src/main/java/io/github/t1willi/configuration/SecurityConfig.java
+/Users/willi/Documents/perso/silver-palm-tree/src/main/java/io/github/t1willi/controller/HomeController.java
+/Users/willi/Documents/perso/silver-palm-tree/src/main/java/io/github/t1willi/entities/ApiKeys.java
+/Users/willi/Documents/perso/silver-palm-tree/src/main/java/io/github/t1willi/entities/User.java
