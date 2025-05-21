@@ -37,10 +37,6 @@ public class UserBroker extends RestBroker<Integer, User> {
     public User updatePassword(int userId, String newHashedPassword)
             throws IllegalArgumentException {
         Optional<User> userOpt = findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("User not found with ID: " + userId);
-        }
-
         User user = userOpt.get();
         user.setPassword(Cryptography.hash(newHashedPassword));
         return save(user);
@@ -48,7 +44,9 @@ public class UserBroker extends RestBroker<Integer, User> {
 
     public Optional<User> authenticate(String username, String password) {
         Optional<User> userOpt = findByUsername(username);
+        System.out.println("username = " + username);
         if (userOpt.isPresent()) {
+            System.out.println("User found: " + userOpt.get());
             User user = userOpt.get();
             if (Cryptography.verify(user.getPassword(), password)) {
                 loadApiKeys(user);

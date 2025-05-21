@@ -28,7 +28,12 @@
                 <#list errors as error>
                     <div>${error}</div>
                 </#list>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button 
+                    type="button" 
+                    class="btn-close" 
+                    data-bs-dismiss="alert" 
+                    aria-label="Close">
+                </button>
             </div>
         </#if>
         <!-- API Keys Section -->

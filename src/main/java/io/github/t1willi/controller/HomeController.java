@@ -1,17 +1,16 @@
 package io.github.t1willi.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import io.github.t1willi.annotations.Controller;
 import io.github.t1willi.annotations.Get;
 import io.github.t1willi.annotations.Post;
 import io.github.t1willi.annotations.ToForm;
-import io.github.t1willi.context.JoltContext;
 import io.github.t1willi.core.MvcController;
 import io.github.t1willi.entities.User;
 import io.github.t1willi.form.Form;
 import io.github.t1willi.http.HttpStatus;
-import io.github.t1willi.http.ModelView;
 import io.github.t1willi.http.ResponseEntity;
 import io.github.t1willi.injector.annotation.Autowire;
 import io.github.t1willi.security.authentification.Authorize;
@@ -19,131 +18,132 @@ import io.github.t1willi.security.session.Session;
 import io.github.t1willi.services.UserService;
 import io.github.t1willi.template.JoltModel;
 
-@Controller()
+@Controller
 public class HomeController extends MvcController {
 
     @Autowire
     private UserService userService;
 
     @Get
-    public ModelView index() {
-        return ModelView.of("home", null);
+    public ResponseEntity<?> index() {
+        return render("home", null);
     }
 
     @Get("/dashboard")
     @Authorize
-    public ModelView dashboard(JoltContext ctx) {
-        return ModelView.of("dashboard",
-                JoltModel.of("username", Session.get("username"))
-                        .with("showKeys", false));
+    public ResponseEntity<?> dashboard() {
+        JoltModel m = JoltModel.of("username", Session.get("username", "guest"))
+                .with("showKeys", false);
+        return render("dashboard", m);
     }
 
     @Get("/connexion")
-    public ModelView login() {
+    public ResponseEntity<?> login() {
         if (Session.isAuthenticated()) {
-            redirect("/dashboard");
+            return redirect("/dashboard");
         }
-        return ModelView.of("login", null);
+        return render("login", null);
     }
 
     @Get("/inscription")
-    public ModelView register() {
+    public ResponseEntity<?> register() {
         if (Session.isAuthenticated()) {
-            redirect("/home");
+            return redirect("/dashboard");
         }
-        return ModelView.of("register", null);
+        return render("register", null);
     }
 
     @Post("/connexion")
     public ResponseEntity<?> loginPost(@ToForm Form form) {
         try {
-            Optional<User> userOpt = this.userService.login(form);
+            Optional<User> userOpt = userService.login(form);
             if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                Session.set("userId", user.getId());
-                Session.set("username", user.getUsername());
+                Session.invalidate();
                 Session.setAuthenticated(true);
+                Session.set("userId", userOpt.get().getId());
+                Session.set("username", userOpt.get().getUsername());
                 return redirect("/dashboard");
             } else {
-                return ResponseEntity.of(HttpStatus.BAD_REQUEST,
-                        ModelView.of("login", JoltModel.of("errors", "Mot de passe ou identifiant incorrect")), false,
-                        null);
+                JoltModel m = JoltModel.of("errors", List.of("Identifiant ou mot de passe incorrect"));
+                return render("login", m)
+                        .status(HttpStatus.BAD_REQUEST);
             }
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.BAD_REQUEST,
-                    ModelView.of("connexion", JoltModel.of("form", form).with("errors", form.errors())), false, null);
+            JoltModel m = JoltModel.of("form", form)
+                    .with("errors", List.copyOf(form.errors().values()));
+            return render("login", m)
+                    .status(HttpStatus.BAD_REQUEST);
         }
     }
 
     @Post("/inscription")
     public ResponseEntity<?> registerPost(@ToForm Form form) {
         try {
-            User user = this.userService.register(form);
-            Session.set("userId", user.getId());
-            Session.set("username", user.getUsername());
+            User u = userService.register(form);
+            Session.invalidate();
             Session.setAuthenticated(true);
+            Session.set("userId", u.getId());
+            Session.set("username", u.getUsername());
             return redirect("/dashboard");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.BAD_REQUEST,
-                    ModelView.of("inscription", JoltModel.of("form", form).with("errors", form.errors())), false, null);
+            JoltModel m = JoltModel.of("form", form)
+                    .with("errors", List.copyOf(form.errors().values()));
+            return render("register", m)
+                    .status(HttpStatus.BAD_REQUEST);
         }
     }
 
     @Post("/dashboard")
     @Authorize
     public ResponseEntity<?> dashboardPost(@ToForm Form form) {
-        int userId = Integer.parseInt(Session.get("userId"));
+        int userId = Integer.parseInt(Session.get("userId", "0"));
         String action = form.field("action").get();
 
         try {
             switch (action) {
                 case "createKey" -> {
-                    String expirationDate = form.field("key_expiration").get();
-                    if (expirationDate != null && expirationDate.isEmpty()) {
-                        expirationDate = null;
-                    }
-                    this.userService.createApiKey(userId, expirationDate, form);
+                    String exp = form.field("key_expiration").get();
+                    if ("".equals(exp))
+                        exp = null;
+                    userService.createApiKey(userId, exp, form);
                 }
-                case "deleteKey" -> this.userService.deleteKey(Integer.parseInt(form.field("keyId").get()));
+                case "deleteKey" -> userService.deleteKey(Integer.parseInt(form.field("keyId").get()));
                 case "updatePassword" -> {
                     form.setValue("userId", String.valueOf(userId));
-                    this.userService.updatePassword(form);
+                    userService.updatePassword(form);
                 }
                 case "logout" -> {
-                    Session.destroy();
-                    return redirect("/home");
+                    Session.invalidate();
+                    return redirect("/");
                 }
             }
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.BAD_REQUEST,
-                    ModelView.of("dashboard", JoltModel.of("username", Session.get("username"))
-                            .with("apiKeys", this.userService.getUserKeys(userId))
-                            .with("form", form)
-                            .with("errors", form.errors())),
-                    false, null);
+        } catch (IllegalArgumentException ex) {
+            JoltModel m = JoltModel.of("username", Session.get("username", "guest"))
+                    .with("apiKeys", userService.getUserKeys(userId))
+                    .with("form", form)
+                    .with("errors", List.copyOf(form.errors().values()));
+            return render("dashboard", m)
+                    .status(HttpStatus.BAD_REQUEST);
         }
 
-        return ResponseEntity.ok(ModelView.of("dashboard",
-                JoltModel.of("username", Session.get("username")).with("apiKeys",
-                        this.userService.getUserKeys(userId))));
+        JoltModel m = JoltModel.of("username", Session.get("username", "guest"))
+                .with("apiKeys", userService.getUserKeys(userId));
+        return render("dashboard", m);
     }
 
     @Post("/dashboard/reveal-keys")
     @Authorize
-    public ModelView revealKeys(@ToForm Form form) {
-        int userId = Integer.parseInt(Session.get("userId"));
-        String pwd = form.field("confirmPassword").get();
-
-        boolean ok = userService.verifyPassword(userId, pwd);
+    public ResponseEntity<?> revealKeys(@ToForm Form form) {
+        int userId = Integer.parseInt(Session.get("userId", "0"));
+        boolean ok = userService.verifyPassword(userId, form.field("confirmPassword").get());
+        JoltModel m = JoltModel.of("username", Session.get("username", "guest"));
         if (!ok) {
-            return ModelView.of("dashboard",
-                    JoltModel.of("username", Session.get("username"))
-                            .with("showKeys", false)
-                            .with("errorKeyAuth", "Mot de passe incorrect"));
+            m = m.with("showKeys", false)
+                    .with("errorKeyAuth", "Mot de passe incorrect");
+        } else {
+            m = m.with("showKeys", true)
+                    .with("apiKeys", userService.getUserKeys(userId));
         }
-        return ModelView.of("dashboard",
-                JoltModel.of("username", Session.get("username"))
-                        .with("showKeys", true)
-                        .with("apiKeys", userService.getUserKeys(userId)));
+        return render("dashboard", m);
     }
 }

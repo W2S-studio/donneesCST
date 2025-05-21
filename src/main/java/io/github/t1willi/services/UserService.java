@@ -28,6 +28,8 @@ public class UserService {
     public Optional<User> login(Form form) {
         String username = form.field("username").get();
         String password = form.field("password").get();
+        System.out.println("username = " + username);
+        System.out.println("password = " + password);
         Optional<User> userOpt = userBroker.authenticate(username, password);
         if (userOpt.isEmpty()) {
             form.addError("username", "Nom d'utilisateur ou mot de passe incorrect");
