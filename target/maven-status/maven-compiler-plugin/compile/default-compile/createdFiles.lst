@@ -1,7 +1,8 @@
-io/github/t1willi/Main.class
-io/github/t1willi/entities/User.class
-io/github/t1willi/brokers/UserBroker.class
-io/github/t1willi/controller/HomeController.class
-io/github/t1willi/brokers/ApiKeysBroker.class
-io/github/t1willi/configuration/SecurityConfig.class
-io/github/t1willi/entities/ApiKeys.class
+io\github\t1willi\entities\ApiKeys.class
+io\github\t1willi\controller\HomeController.class
+io\github\t1willi\services\UserService.class
+io\github\t1willi\entities\User.class
+io\github\t1willi\brokers\UserBroker.class
+io\github\t1willi\brokers\ApiKeysBroker.class
+io\github\t1willi\configuration\SecurityConfig.class
+io\github\t1willi\Main.class

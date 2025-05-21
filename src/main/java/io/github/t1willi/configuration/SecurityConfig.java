@@ -36,10 +36,11 @@ public class SecurityConfig extends SecurityConfiguration {
                 .withCacheControl(CacheControlPolicy.NO_CACHE)
                 .withCSP()
                 .withDefaultSources(ContentSecurityPolicy.SELF)
-                .withStyleSources(ContentSecurityPolicy.SELF)
+                .withStyleSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
+                        ContentSecurityPolicy.CDNJS, "https://cdn.jsdelivr.net")
                 .withScriptSources(ContentSecurityPolicy.SELF)
                 .withFontSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
-                        "https://fonts.gstatic.com", ContentSecurityPolicy.CDNJS)
+                        "https://fonts.gstatic.com", ContentSecurityPolicy.CDNJS, "https://cdn.jsdelivr.net")
                 .withImageSources(ContentSecurityPolicy.SELF, "*")
                 .withConnectSources(ContentSecurityPolicy.SELF, "*")
                 .withFrameSources(ContentSecurityPolicy.SELF, "*")

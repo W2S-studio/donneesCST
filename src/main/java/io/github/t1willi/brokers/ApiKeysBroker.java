@@ -11,7 +11,7 @@ import io.github.t1willi.entities.ApiKeys;
 
 public class ApiKeysBroker extends RestBroker<Integer, ApiKeys> {
 
-    protected ApiKeysBroker() {
+    public ApiKeysBroker() {
         super("api_keys", ApiKeys.class, int.class);
     }
 

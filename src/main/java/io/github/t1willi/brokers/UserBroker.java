@@ -7,10 +7,11 @@ import java.util.Optional;
 import io.github.t1willi.database.RestBroker;
 import io.github.t1willi.entities.ApiKeys;
 import io.github.t1willi.entities.User;
+import io.github.t1willi.security.cryptography.Cryptography;
 
 public class UserBroker extends RestBroker<Integer, User> {
 
-    protected UserBroker() {
+    public UserBroker() {
         super("users", User.class, int.class);
     }
 
@@ -33,7 +34,7 @@ public class UserBroker extends RestBroker<Integer, User> {
         return save(user);
     }
 
-    public User updatePassword(int userId, String newHashedPassword, String oldHashedPassword)
+    public User updatePassword(int userId, String newHashedPassword)
             throws IllegalArgumentException {
         Optional<User> userOpt = findById(userId);
         if (userOpt.isEmpty()) {
@@ -41,19 +42,15 @@ public class UserBroker extends RestBroker<Integer, User> {
         }
 
         User user = userOpt.get();
-        if (!user.getPassword().equals(oldHashedPassword)) {
-            throw new IllegalArgumentException("Old password does not match");
-        }
-
-        user.setPassword(newHashedPassword);
+        user.setPassword(Cryptography.hash(newHashedPassword));
         return save(user);
     }
 
-    public Optional<User> authenticate(String username, String hashedPassword) {
+    public Optional<User> authenticate(String username, String password) {
         Optional<User> userOpt = findByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            if (user.getPassword().equals(hashedPassword)) {
+            if (Cryptography.verify(user.getPassword(), password)) {
                 loadApiKeys(user);
                 return Optional.of(user);
             }
