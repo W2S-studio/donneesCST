@@ -112,7 +112,7 @@ public class HomeController extends MvcController {
         return redirect("/dashboard");
     }
 
-    public void handleDashboardAction(String action, Form form) {
+    private void handleDashboardAction(String action, Form form) {
         int userId = getCurrentUserId();
 
         switch (action) {
@@ -136,24 +136,24 @@ public class HomeController extends MvcController {
         }
     }
 
-    public void initializeUserSession(User user) {
+    private void initializeUserSession(User user) {
         Session.invalidate();
         Session.setAuthenticated(true);
         Session.set("userId", String.valueOf(user.getId()));
         Session.set("username", user.getUsername());
     }
 
-    public JoltModel createDashboardModel() {
+    private JoltModel createDashboardModel() {
         return JoltModel.of(Map.of("username", getCurrentUsername()))
                 .with("apiKeys", userService.getUserKeys(getCurrentUserId()));
     }
 
-    public ResponseEntity<?> renderWithErrors(String view, Form form) {
+    private ResponseEntity<?> renderWithErrors(String view, Form form) {
         JoltModel model = JoltModel.of(Map.of("errors", form.errors().values()));
         return render(view, model).status(HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<?> renderDashboardWithErrors(Form form) {
+    private ResponseEntity<?> renderDashboardWithErrors(Form form) {
         JoltModel model = createDashboardModel()
                 .with("showKeys", getSessionShowKeys())
                 .with("form", form)
@@ -161,19 +161,19 @@ public class HomeController extends MvcController {
         return render("dashboard", model).status(HttpStatus.BAD_REQUEST);
     }
 
-    public int getCurrentUserId() {
+    private int getCurrentUserId() {
         return Integer.parseInt(Session.get("userId", "0"));
     }
 
-    public String getCurrentUsername() {
-        return Session.get("username", "guest");
+    private String getCurrentUsername() {
+        return Session.get("username");
     }
 
-    public boolean getSessionShowKeys() {
+    private boolean getSessionShowKeys() {
         return Boolean.parseBoolean(Session.get("showKeys", "false"));
     }
 
-    public static class LogoutException extends RuntimeException {
+    private static class LogoutException extends RuntimeException {
         // Used to break out of switch and trigger redirect
     }
 }

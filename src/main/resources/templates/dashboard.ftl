@@ -9,19 +9,9 @@
     <link nonce="${nonce()}" href="/style/home.css" rel="stylesheet">
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <header class="text-white">
-        <div class="container d-flex justify-content-between align-items-center">
-            <h1 class="fs-3 fw-bold">DonnéesCST</h1>
-            <nav>
-                <span class="navbar-text text-white me-3">Bienvenue, ${username}</span>
-                <a href="/" class="btn btn-outline-light mx-2 active">Accueil</a>
-                <form action="/dashboard" method="post" class="d-inline">
-                    <input type="hidden" name="action" value="logout">
-                    <button type="submit" class="btn btn-outline-light mx-2">Déconnexion</button>
-                </form>
-            </nav>
-        </div>
-    </header>
+    <#assign currentPage = "dashboard">
+    <#include "components/header.ftl">
+
     <main class="container flex-grow-1 py-5">
         <#if errors?? && errors?size gt 0>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -37,7 +27,6 @@
             </div>
         </#if>
 
-        <!-- API Keys Section -->
         <section class="mb-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="h3 fw-bold mb-0">Gérer vos clés API</h2>
@@ -94,7 +83,7 @@
                                     <tr>
                                         <td>
                                             <code class="text-break">${key.key}</code>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="copyToClipboard('${key.key}')">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2 copy-key-btn" data-key="${key.key}">
                                                 <i class="bi bi-clipboard"></i>
                                             </button>
                                         </td>
@@ -109,12 +98,10 @@
                                             </#if>
                                         </td>
                                         <td>
-                                            <form action="/dashboard" method="post" class="d-inline">
+                                            <form action="/dashboard" method="post" class="d-inline delete-key-form">
                                                 <input type="hidden" name="action" value="deleteKey">
                                                 <input type="hidden" name="keyId" value="${key.id}">
-                                                <button type="submit" 
-                                                        class="btn btn-danger btn-sm"
-                                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette clé API ?')">
+                                                <button type="submit" class="btn btn-danger btn-sm">
                                                     <i class="bi bi-trash"></i> Supprimer
                                                 </button>
                                             </form>
@@ -190,39 +177,7 @@
         </section>
     </main>
 
-    <footer class="bg-dark text-white">
-        <div class="container">
-            <div class="row gy-4">
-                <div class="col-12 col-md-4 text-center text-md-start">
-                    <h5 class="fw-bold mb-3">DonnéesCST</h5>
-                    <p class="text-muted">Un projet gratuit pour les étudiants du Cégep de Sorel-Tracy, créé avec passion.</p>
-                </div>
-                <div class="col-12 col-md-4 text-center">
-                    <h5 class="fw-bold mb-3">Liens rapides</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="/connexion" class="text-white text-decoration-none">Connexion</a></li>
-                        <li><a href="/inscription" class="text-white text-decoration-none">Inscription</a></li>
-                        <li><a href="/documentation" class="text-white text-decoration-none">Documentation</a></li>
-                    </ul>
-                </div>
-                <div class="col-12 col-md-4 text-center text-md-end">
-                    <h5 class="fw-bold mb-3">Restez connecté</h5>
-                    <div class="social-icons mb-3">
-                        <a href="#" class="text-white"><i class="bi bi-github"></i></a>
-                        <a href="#" class="text-white"><i class="bi bi-linkedin"></i></a>
-                        <a href="mailto:contact@donneescst.quebec" class="text-white"><i class="bi bi-envelope-fill"></i></a>
-                    </div>
-                    <form class="d-flex justify-content-center justify-content-md-end">
-                        <input type="email" class="form-control w-auto me-2" placeholder="Votre courriel" disabled>
-                        <button type="submit" class="btn btn-primary" disabled>S'abonner</button>
-                    </form>
-                    <small class="text-muted d-block mt-2">(Bientôt disponible!)</small>
-                </div>
-            </div>
-            <hr class="bg-white my-4">
-            <p class="text-center mb-0">© 2025 DonnéesCST. Tous droits réservés.</p>
-        </div>
-    </footer>
+    <#include "components/footer.ftl">
 
     <script nonce="${nonce()}">
         const passwordInput = document.getElementById('newPassword');
@@ -325,20 +280,36 @@
                     element.textContent = formatDate(originalDate);
                 }
             });
+
+            const copyButtons = document.querySelectorAll('.copy-key-btn');
+            copyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const keyValue = this.getAttribute('data-key');
+                    copyToClipboard(keyValue, this);
+                });
+            });
+
+            const deleteForms = document.querySelectorAll('.delete-key-form');
+            deleteForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Êtes-vous sûr de vouloir supprimer cette clé API ?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
         });
 
-        function copyToClipboard(text) {
+        function copyToClipboard(text, buttonElement) {
             navigator.clipboard.writeText(text).then(function() {
-                const originalButton = event.target.closest('button');
-                const originalContent = originalButton.innerHTML;
-                originalButton.innerHTML = '<i class="bi bi-check"></i>';
-                originalButton.classList.remove('btn-outline-secondary');
-                originalButton.classList.add('btn-success');
+                const originalContent = buttonElement.innerHTML;
+                buttonElement.innerHTML = '<i class="bi bi-check"></i>';
+                buttonElement.classList.remove('btn-outline-secondary');
+                buttonElement.classList.add('btn-success');
                 
                 setTimeout(() => {
-                    originalButton.innerHTML = originalContent;
-                    originalButton.classList.remove('btn-success');
-                    originalButton.classList.add('btn-outline-secondary');
+                    buttonElement.innerHTML = originalContent;
+                    buttonElement.classList.remove('btn-success');
+                    buttonElement.classList.add('btn-outline-secondary');
                 }, 2000);
             }).catch(function(err) {
                 console.error('Erreur lors de la copie: ', err);
