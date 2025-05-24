@@ -14,7 +14,7 @@
             <h1 class="fs-3 fw-bold">DonnéesCST</h1>
             <nav>
                 <span class="navbar-text text-white me-3">Bienvenue, ${username}</span>
-                <a href="/dashboard" class="btn btn-outline-light mx-2 active">Tableau de bord</a>
+                <a href="/" class="btn btn-outline-light mx-2 active">Accueil</a>
                 <form action="/dashboard" method="post" class="d-inline">
                     <input type="hidden" name="action" value="logout">
                     <button type="submit" class="btn btn-outline-light mx-2">Déconnexion</button>
@@ -36,9 +36,19 @@
                 </button>
             </div>
         </#if>
+
         <!-- API Keys Section -->
         <section class="mb-5">
-            <h2 class="h3 fw-bold mb-4">Gérer vos clés API</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 fw-bold mb-0">Gérer vos clés API</h2>
+                <#if showKeys>
+                    <form action="/dashboard/hide-keys" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-eye-slash"></i> Masquer les clés
+                        </button>
+                    </form>
+                </#if>
+            </div>
 
             <#if showKeys>
                 <div class="card shadow-sm mb-4">
@@ -46,14 +56,14 @@
                         <form action="/dashboard" method="post" class="row g-3 align-items-end">
                             <input type="hidden" name="action" value="createKey">
                             <div class="col-md-6">
-                                <label for="key_expiration" class="form-label">Date d’expiration (optionnel)</label>
+                                <label for="key_expiration" class="form-label">Date d'expiration (optionnel)</label>
                                 <input type="date"
                                        class="form-control"
                                        id="key_expiration"
                                        name="key_expiration"
                                        value="${(form.field('key_expiration').get())!''}">
                                 <small class="form-text text-muted">
-                                    Si aucune date d’expiration n’est choisie, la clé sera valide pour toujours.
+                                    Si aucune date d'expiration n'est choisie, la clé sera valide pour toujours.
                                     <span class="text-danger">
                                         Attention : une clé permanente ne peut être désactivée que par suppression.
                                     </span>
@@ -75,28 +85,37 @@
                                 <tr>
                                     <th>Clé</th>
                                     <th>Date de création</th>
-                                    <th>Date d’expiration</th>
+                                    <th>Date d'expiration</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <#list apiKeys as key>
                                     <tr>
-                                        <td>${key.key}</td>
-                                        <td>${key.created}</td>
+                                        <td>
+                                            <code class="text-break">${key.key}</code>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="copyToClipboard('${key.key}')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <span data-date="${key.created}" class="format-date">${key.created}</span>
+                                        </td>
                                         <td>
                                             <#if key.expire??>
-                                                ${key.expire}
+                                                <span data-date="${key.expire}" class="format-date">${key.expire}</span>
                                             <#else>
-                                                Jamais
+                                                <span class="text-muted">Jamais</span>
                                             </#if>
                                         </td>
                                         <td>
                                             <form action="/dashboard" method="post" class="d-inline">
                                                 <input type="hidden" name="action" value="deleteKey">
                                                 <input type="hidden" name="keyId" value="${key.id}">
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    Supprimer
+                                                <button type="submit" 
+                                                        class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette clé API ?')">
+                                                    <i class="bi bi-trash"></i> Supprimer
                                                 </button>
                                             </form>
                                         </td>
@@ -106,55 +125,71 @@
                         </table>
                     </div>
                 <#else>
-                    <p class="text-muted">Aucune clé API pour le moment.</p>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Aucune clé API pour le moment.
+                    </div>
                 </#if>
 
             <#else>
-                <form action="/dashboard/reveal-keys" method="post" class="row g-3 align-items-end">
-                    <div class="col-md-8">
-                        <label for="confirmPassword" class="form-label">
-                            Entrez votre mot de passe pour voir vos clés API
-                        </label>
-                        <input type="password"
-                               class="form-control"
-                               id="confirmPassword"
-                               name="confirmPassword"
-                               required>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form action="/dashboard/reveal-keys" method="post" class="row g-3 align-items-end">
+                            <div class="col-md-8">
+                                <label for="confirmPassword" class="form-label">
+                                    <i class="bi bi-shield-lock"></i> Entrez votre mot de passe pour voir vos clés API
+                                </label>
+                                <input type="password"
+                                       class="form-control"
+                                       id="confirmPassword"
+                                       name="confirmPassword"
+                                       required>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-eye"></i> Afficher les clés
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary w-100">
-                            Afficher les clés
-                        </button>
-                    </div>
-                </form>
+                </div>
                 <#if errorKeyAuth??>
-                    <div class="alert alert-danger mt-3">${errorKeyAuth}</div>
+                    <div class="alert alert-danger mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> ${errorKeyAuth}
+                    </div>
                 </#if>
             </#if>
         </section>
+
         <!-- Password Update Section -->
         <section>
             <h2 class="h3 fw-bold mb-4">Modifier le mot de passe</h2>
-            <form action="/dashboard" method="post" id="passwordForm" novalidate>
-                <input type="hidden" name="action" value="updatePassword">
-                <div class="mb-3">
-                    <label for="oldPassword" class="form-label">Ancien mot de passe</label>
-                    <input type="password" class="form-control" id="oldPassword" name="oldPassword" required>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form action="/dashboard" method="post" id="passwordForm" novalidate>
+                        <input type="hidden" name="action" value="updatePassword">
+                        <div class="mb-3">
+                            <label for="oldPassword" class="form-label">Ancien mot de passe</label>
+                            <input type="password" class="form-control" id="oldPassword" name="oldPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                            <small id="passwordFeedback" class="form-text text-muted"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPasswordConfirm" class="form-label">Confirmer le nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="newPasswordConfirm" name="newPasswordConfirm" required>
+                            <small id="passwordMatchFeedback" class="form-text text-muted"></small>
+                        </div>
+                        <button type="submit" class="btn btn-primary" disabled id="submitButton">
+                            <i class="bi bi-shield-check"></i> Modifier le mot de passe
+                        </button>
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <label for="newPassword" class="form-label">Nouveau mot de passe</label>
-                    <input type="password" class="form-control" id="newPassword" name="newPassword" required>
-                    <small id="passwordFeedback" class="form-text text-muted"></small>
-                </div>
-                <div class="mb-3">
-                    <label for="newPasswordConfirm" class="form-label">Confirmer le nouveau mot de passe</label>
-                    <input type="password" class="form-control" id="newPasswordConfirm" name="newPasswordConfirm" required>
-                    <small id="passwordMatchFeedback" class="form-text text-muted"></small>
-                </div>
-                <button type="submit" class="btn btn-primary" disabled id="submitButton">Modifier le mot de passe</button>
-            </form>
+            </div>
         </section>
     </main>
+
     <footer class="bg-dark text-white">
         <div class="container">
             <div class="row gy-4">
@@ -188,6 +223,7 @@
             <p class="text-center mb-0">© 2025 DonnéesCST. Tous droits réservés.</p>
         </div>
     </footer>
+
     <script nonce="${nonce()}">
         const passwordInput = document.getElementById('newPassword');
         const passwordConfirmInput = document.getElementById('newPasswordConfirm');
@@ -263,6 +299,52 @@
             validatePasswordMatch();
             updateSubmitButton();
         });
+
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleString('fr-CA', {
+                    timeZone: 'America/Montreal',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateElements = document.querySelectorAll('.format-date');
+            dateElements.forEach(element => {
+                const originalDate = element.getAttribute('data-date');
+                if (originalDate) {
+                    element.textContent = formatDate(originalDate);
+                }
+            });
+        });
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                const originalButton = event.target.closest('button');
+                const originalContent = originalButton.innerHTML;
+                originalButton.innerHTML = '<i class="bi bi-check"></i>';
+                originalButton.classList.remove('btn-outline-secondary');
+                originalButton.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    originalButton.innerHTML = originalContent;
+                    originalButton.classList.remove('btn-success');
+                    originalButton.classList.add('btn-outline-secondary');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Erreur lors de la copie: ', err);
+                alert('Impossible de copier la clé. Veuillez la sélectionner manuellement.');
+            });
+        }
     </script>
     <script nonce="${nonce()}" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
