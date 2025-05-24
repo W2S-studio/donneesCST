@@ -130,7 +130,7 @@ public class HomeController extends MvcController {
                 userService.updatePassword(userId, form);
             }
             case "logout" -> {
-                Session.invalidate();
+                Session.destroy();
                 throw new LogoutException();
             }
         }
