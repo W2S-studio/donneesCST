@@ -15,9 +15,9 @@ public class ApiKeysBroker extends RestBroker<Integer, ApiKeys> {
         super("api_keys", ApiKeys.class, int.class);
     }
 
-    public List<ApiKeys> findByUserId(int id) {
+    public List<ApiKeys> findByUserId(int userId) {
         Map<String, Object> criteria = new HashMap<>();
-        criteria.put("user_id", id);
+        criteria.put("user_id", userId);
         return findByCriteria(criteria);
     }
 
@@ -35,20 +35,17 @@ public class ApiKeysBroker extends RestBroker<Integer, ApiKeys> {
     }
 
     public boolean isKeyValid(String key) {
-        Optional<ApiKeys> apiKey = findByKey(key);
-        if (apiKey.isEmpty()) {
-            return false;
-        }
-
-        LocalDateTime expire = apiKey.get().getExpire();
-        if (expire == null) {
-            return true;
-        }
-
-        return !LocalDateTime.now().isAfter(expire);
+        return findByKey(key)
+                .map(this::isNotExpired)
+                .orElse(false);
     }
 
     public void deleteExpiredKeys() {
         query("DELETE FROM api_keys WHERE expire IS NOT NULL AND expire < NOW()");
+    }
+
+    private boolean isNotExpired(ApiKeys apiKey) {
+        LocalDateTime expire = apiKey.getExpire();
+        return expire == null || !LocalDateTime.now().isAfter(expire);
     }
 }

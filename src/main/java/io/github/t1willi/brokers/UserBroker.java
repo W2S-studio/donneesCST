@@ -23,7 +23,7 @@ public class UserBroker extends RestBroker<Integer, User> {
         return findByUsername(username).isPresent();
     }
 
-    public User createUser(String username, String hashedPassword) throws IllegalArgumentException {
+    public User createUser(String username, String hashedPassword) {
         if (usernameExists(username)) {
             throw new IllegalArgumentException("Username already exists: " + username);
         }
@@ -34,29 +34,26 @@ public class UserBroker extends RestBroker<Integer, User> {
         return save(user);
     }
 
-    public User updatePassword(int userId, String newHashedPassword)
-            throws IllegalArgumentException {
-        Optional<User> userOpt = findById(userId);
-        User user = userOpt.get();
-        user.setPassword(Cryptography.hash(newHashedPassword));
+    public User updatePassword(int userId, String newPassword) {
+        User user = findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setPassword(Cryptography.hash(newPassword));
         return save(user);
     }
 
     public Optional<User> authenticate(String username, String password) {
-        Optional<User> userOpt = findByUsername(username);
-        System.out.println("username = " + username);
-        if (userOpt.isPresent()) {
-            System.out.println("User found: " + userOpt.get());
-            User user = userOpt.get();
-            if (Cryptography.verify(user.getPassword(), password)) {
-                loadApiKeys(user);
-                return Optional.of(user);
-            }
-        }
-        return Optional.empty();
+        return findByUsername(username)
+                .filter(user -> Cryptography.verify(user.getPassword(), password))
+                .map(this::loadUserWithApiKeys);
     }
 
-    public void loadApiKeys(User user) {
+    private User loadUserWithApiKeys(User user) {
+        loadApiKeys(user);
+        return user;
+    }
+
+    private void loadApiKeys(User user) {
         List<ApiKeys> apiKeys = new ApiKeysBroker().findByUserId(user.getId());
         user.setApiKeys(apiKeys);
     }

@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Bean
 public class UserService {
@@ -21,120 +20,82 @@ public class UserService {
     private final UserBroker userBroker = new UserBroker();
     private final ApiKeysBroker apiKeysBroker = new ApiKeysBroker();
 
-    // Password validation regex: 8+ chars, 1 upper, 1 lower, 1 number, 1 special
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
-            "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,}$");
-
-    public Optional<User> login(Form form) {
+    public User authenticate(Form form) {
         String username = form.field("username").get();
         String password = form.field("password").get();
-        System.out.println("username = " + username);
-        System.out.println("password = " + password);
-        Optional<User> userOpt = userBroker.authenticate(username, password);
-        if (userOpt.isEmpty()) {
-            form.addError("username", "Nom d'utilisateur ou mot de passe incorrect");
-            form.addError("password", "Nom d'utilisateur ou mot de passe incorrect");
-        }
-        if (!form.validate()) {
-            throw new IllegalArgumentException(String.join("; ", form.errors().values()));
-        }
-        return userOpt;
+
+        return userBroker.authenticate(username, password)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     }
 
     public User register(Form form) {
         String username = form.field("username").get();
         String password = form.field("password").get();
-        String passwordConfirm = form.field("passwordConfirm").get();
 
         if (userBroker.usernameExists(username)) {
-            form.addError("username", "Ce nom d'utilisateur est déjà pris");
-        }
-        if (!password.equals(passwordConfirm)) {
-            form.addError("password", "Les mots de passe ne correspondent pas");
-            form.addError("passwordConfirm", "Les mots de passe ne correspondent pas");
-        }
-        if (!PASSWORD_PATTERN.matcher(password).matches()) {
-            form.addError("password",
-                    "Le mot de passe doit contenir au moins 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!@#$%^&*)");
-        }
-        if (!form.validate()) {
-            throw new IllegalArgumentException(String.join("; ", form.errors().values()));
+            throw new IllegalArgumentException("Username already exists");
         }
 
         String hashedPassword = Cryptography.hash(password);
         return userBroker.createUser(username, hashedPassword);
     }
 
-    public void updatePassword(Form form) {
-        int userId = form.field("userId").asInt();
+    public void updatePassword(int userId, Form form) {
         String oldPassword = form.field("oldPassword").get();
         String newPassword = form.field("newPassword").get();
-        String newPasswordConfirm = form.field("newPasswordConfirm").get();
 
-        Optional<User> userOpt = userBroker.findById(userId);
-        if (userOpt.isEmpty()) {
-            form.addError("userId", "Utilisateur non trouvé");
-        } else {
-            User user = userOpt.get();
-            if (Cryptography.verify(user.getPassword(), oldPassword)) {
-                form.addError("oldPassword", "L'ancien mot de passe est incorrect");
-            }
-            if (Cryptography.verify(user.getPassword(), newPassword)) {
-                form.addError("newPassword", "Le nouveau mot de passe ne peut pas être le même que l'ancien");
-            }
+        User user = getUserById(userId);
+
+        if (!Cryptography.verify(user.getPassword(), oldPassword)) {
+            throw new IllegalArgumentException("Current password is incorrect");
         }
-        if (!newPassword.equals(newPasswordConfirm)) {
-            form.addError("newPassword", "Les nouveaux mots de passe ne correspondent pas");
-            form.addError("newPasswordConfirm", "Les nouveaux mots de passe ne correspondent pas");
-        }
-        if (!PASSWORD_PATTERN.matcher(newPassword).matches()) {
-            form.addError("newPassword",
-                    "Le nouveau mot de passe doit contenir au moins 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!@#$%^&*)");
-        }
-        if (!form.validate()) {
-            throw new IllegalArgumentException(String.join("; ", form.errors().values()));
+
+        if (Cryptography.verify(user.getPassword(), newPassword)) {
+            throw new IllegalArgumentException("New password cannot be the same as current password");
         }
 
         userBroker.updatePassword(userId, newPassword);
     }
 
-    public ApiKeys createApiKey(int userId, String expirationDate, Form form) {
+    public ApiKeys createApiKey(int userId, String expirationDate) {
         String key = CryptographyUtils.randomHex(32);
-        LocalDateTime expiration = null;
-        if (expirationDate != null && !expirationDate.isEmpty()) {
-            try {
-                LocalDate date = LocalDate.parse(expirationDate);
-                if (date.isBefore(LocalDate.now())) {
-                    form.addError("key_expiration", "La date d'expiration doit être dans le futur");
-                } else {
-                    expiration = date.atStartOfDay();
-                }
-            } catch (Exception e) {
-                form.addError("key_expiration", "Format de date invalide");
-            }
-        }
-        if (!form.validate()) {
-            throw new IllegalArgumentException(String.join("; ", form.errors().values()));
-        }
+        LocalDateTime expiration = parseExpirationDate(expirationDate);
+
         return apiKeysBroker.createApiKey(userId, key, expiration);
     }
 
     public boolean verifyPassword(int userId, String password) {
         Optional<User> userOpt = userBroker.findById(userId);
-        if (userOpt.isEmpty()) {
-            System.out.println("User not found with ID: " + userId);
-            return false;
-        }
-        User user = userOpt.get();
-        System.out.println("User = " + user);
-        return Cryptography.verify(user.getPassword(), password);
+        return userOpt.map(user -> Cryptography.verify(user.getPassword(), password))
+                .orElse(false);
     }
 
     public List<ApiKeys> getUserKeys(int userId) {
         return apiKeysBroker.findByUserId(userId);
     }
 
-    public void deleteKey(int keyId) {
+    public void deleteApiKey(int keyId) {
         apiKeysBroker.deleteById(keyId);
+    }
+
+    private User getUserById(int userId) {
+        return userBroker.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    private LocalDateTime parseExpirationDate(String expirationDate) {
+        if (expirationDate == null || expirationDate.isEmpty()) {
+            return null;
+        }
+
+        try {
+            LocalDate date = LocalDate.parse(expirationDate);
+            if (date.isBefore(LocalDate.now())) {
+                throw new IllegalArgumentException("Expiration date must be in the future");
+            }
+            return date.atStartOfDay();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid date format");
+        }
     }
 }
