@@ -1,7 +1,9 @@
-version: '3'
+version: '3.8'
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "80:80"
     depends_on:
@@ -9,6 +11,32 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    volumes:
+      - ./src:/workspace/src
+      - ./pom.xml:/workspace/pom.xml
+      - maven-repo:/workspace/.m2
+    environment:
+      - MAVEN_OPTS=-Dmaven.repo.local=/workspace/.m2
+    develop:
+      watch:
+        - action: sync
+          path: ./src/main/resources/static
+          target: /workspace/src/main/resources/static
+          ignore:
+            - target/
+        - action: sync
+          path: ./src/main/resources/templates
+          target: /workspace/src/main/resources/templates
+          ignore:
+            - target/
+        - action: rebuild
+          path: ./src/main/java
+          target: /workspace/src/main/java
+          ignore:
+            - target/
+        - action: rebuild
+          path: ./pom.xml
+          target: /workspace/pom.xml
 
   postgres:
     image: postgres:14-alpine
@@ -31,4 +59,6 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  maven-repo:
     driver: local

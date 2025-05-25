@@ -14,43 +14,44 @@ import jakarta.annotation.PostConstruct;
 @Configuration(value = ConfigurationType.SECURITY)
 public class SecurityConfig extends SecurityConfiguration {
 
-    @PostConstruct
-    public void init() {
-        configure();
-    }
+        @PostConstruct
+        public void init() {
+                configure();
+        }
 
-    @Override
-    public SecurityConfiguration configure() {
-        withCORS()
-                .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedHeaders("Origin", "Content-Type", "Accept", "Authorization")
-                .allowedCredentials(false)
-                .maxAge(3600);
+        @Override
+        public SecurityConfiguration configure() {
+                withCORS()
+                                .allowedOrigins("*")
+                                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                                .allowedHeaders("Origin", "Content-Type", "Accept", "Authorization")
+                                .allowedCredentials(false)
+                                .maxAge(3600);
 
-        withHeaders()
-                .withXssProtection(XssProtectionPolicy.ENABLE_BLOCK)
-                .withFrameOptions(FrameOptionsPolicy.DENY)
-                .withHsts(HstsPolicy.ONE_YEAR_WITH_SUBDOMAINS_PRELOAD)
-                .withReferrerPolicy(ReferrerPolicy.STRICT_ORIGIN)
-                .withCacheControl(CacheControlPolicy.NO_CACHE)
-                .withCSP()
-                .withDefaultSources(ContentSecurityPolicy.SELF)
-                .withStyleSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
-                        ContentSecurityPolicy.CDNJS, "https://cdn.jsdelivr.net")
-                .withScriptSources(ContentSecurityPolicy.SELF)
-                .withFontSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
-                        "https://fonts.gstatic.com", ContentSecurityPolicy.CDNJS, "https://cdn.jsdelivr.net")
-                .withImageSources(ContentSecurityPolicy.SELF, "*")
-                .withConnectSources(ContentSecurityPolicy.SELF, "*")
-                .withFrameSources(ContentSecurityPolicy.SELF, "*")
-                .withMediaSources(ContentSecurityPolicy.SELF, "*")
-                .and()
-                .httpsOnly(false);
+                withHeaders()
+                                .withXssProtection(XssProtectionPolicy.ENABLE_BLOCK)
+                                .withFrameOptions(FrameOptionsPolicy.DENY)
+                                .withHsts(HstsPolicy.ONE_YEAR_WITH_SUBDOMAINS_PRELOAD)
+                                .withReferrerPolicy(ReferrerPolicy.STRICT_ORIGIN)
+                                .withCacheControl(CacheControlPolicy.NO_CACHE)
+                                .withCSP()
+                                .withDefaultSources(ContentSecurityPolicy.SELF)
+                                .withStyleSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
+                                                ContentSecurityPolicy.CDNJS, "https://cdn.jsdelivr.net")
+                                .withScriptSources(ContentSecurityPolicy.SELF)
+                                .withFontSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
+                                                "https://fonts.gstatic.com", ContentSecurityPolicy.CDNJS,
+                                                "https://cdn.jsdelivr.net")
+                                .withImageSources(ContentSecurityPolicy.SELF, "data:", "*")
+                                .withConnectSources(ContentSecurityPolicy.SELF, "*")
+                                .withFrameSources(ContentSecurityPolicy.SELF, "*")
+                                .withMediaSources(ContentSecurityPolicy.SELF, "*")
+                                .and()
+                                .httpsOnly(false);
 
-        withCSRF().enable();
-        withNonce().enable();
-        withMaxRequest(120);
-        return this;
-    }
+                withCSRF().enable();
+                withNonce().enable();
+                withMaxRequest(120);
+                return this;
+        }
 }

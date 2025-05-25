@@ -13,7 +13,7 @@
     <maven.compiler.target>21</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.class>io.github.t1willi.Main</main.class>
-    <jolt.version>2.8.6.1</jolt.version>
+    <jolt.version>2.8.8</jolt.version>
   </properties>
 
   <dependencies>
