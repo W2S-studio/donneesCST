@@ -17,6 +17,7 @@
                 <a href="/connexion" class="btn btn-outline-light mx-2">Connexion</a>
                 <a href="/inscription" class="btn btn-outline-light mx-2">Inscription</a>
             </#if>
+            <a href="/docs" class="btn btn-outline-light mx-2">Docs</a>
         </nav>
     </div>
 </header>
