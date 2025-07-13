@@ -1,7 +1,6 @@
 package io.github.t1willi.configuration;
 
 import io.github.t1willi.injector.annotation.Configuration;
-import io.github.t1willi.injector.type.ConfigurationType;
 import io.github.t1willi.security.config.SecurityConfiguration;
 import io.github.t1willi.security.policies.CacheControlPolicy;
 import io.github.t1willi.security.policies.ContentSecurityPolicy;
@@ -11,7 +10,7 @@ import io.github.t1willi.security.policies.ReferrerPolicy;
 import io.github.t1willi.security.policies.XssProtectionPolicy;
 import jakarta.annotation.PostConstruct;
 
-@Configuration(value = ConfigurationType.SECURITY)
+@Configuration
 public class SecurityConfig extends SecurityConfiguration {
 
         @PostConstruct
@@ -20,7 +19,7 @@ public class SecurityConfig extends SecurityConfiguration {
         }
 
         @Override
-        public SecurityConfiguration configure() {
+        public void configure() {
                 withCORS()
                                 .allowedOrigins("*")
                                 .allowedMethods("GET", "POST", "PUT", "DELETE")
@@ -52,6 +51,5 @@ public class SecurityConfig extends SecurityConfiguration {
                 withCSRF().enable();
                 withNonce().enable();
                 withMaxRequest(120);
-                return this;
         }
 }

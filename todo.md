@@ -1,5 +1,0 @@
-- Users
-- Products
-- Orders
-- Categories
-- Buses (tracking and management)

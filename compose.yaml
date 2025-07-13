@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
+      - "443:443"
       - "80:80"
     depends_on:
       postgres:
@@ -14,21 +15,12 @@ services:
     volumes:
       - ./src:/workspace/src
       - ./pom.xml:/workspace/pom.xml
+      - ./certs:/app/tmp/tomcat/certs:ro
       - maven-repo:/workspace/.m2
     environment:
       - MAVEN_OPTS=-Dmaven.repo.local=/workspace/.m2
     develop:
       watch:
-        - action: sync
-          path: ./src/main/resources/static
-          target: /workspace/src/main/resources/static
-          ignore:
-            - target/
-        - action: sync
-          path: ./src/main/resources/templates
-          target: /workspace/src/main/resources/templates
-          ignore:
-            - target/
         - action: rebuild
           path: ./src/main/java
           target: /workspace/src/main/java
@@ -39,7 +31,7 @@ services:
           target: /workspace/pom.xml
 
   postgres:
-    image: postgres:14-alpine
+    image: postgres:17-alpine
     container_name: jolt-postgres
     restart: unless-stopped
     environment:
@@ -52,7 +44,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d jolt_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
