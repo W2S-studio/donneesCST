@@ -37,7 +37,7 @@ public class SecurityConfig extends SecurityConfiguration {
                                 .withDefaultSources(ContentSecurityPolicy.SELF)
                                 .withStyleSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
                                                 ContentSecurityPolicy.CDNJS, "https://cdn.jsdelivr.net")
-                                .withScriptSources(ContentSecurityPolicy.SELF)
+                                .withScriptSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.CDNJS)
                                 .withFontSources(ContentSecurityPolicy.SELF, ContentSecurityPolicy.GOOGLE_FONTS,
                                                 "https://fonts.gstatic.com", ContentSecurityPolicy.CDNJS,
                                                 "https://cdn.jsdelivr.net")
@@ -46,7 +46,7 @@ public class SecurityConfig extends SecurityConfiguration {
                                 .withFrameSources(ContentSecurityPolicy.SELF, "*")
                                 .withMediaSources(ContentSecurityPolicy.SELF, "*")
                                 .and()
-                                .httpsOnly(false);
+                                .httpsOnly(true);
 
                 withCSRF().enable();
                 withNonce().enable();

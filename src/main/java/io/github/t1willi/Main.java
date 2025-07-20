@@ -9,6 +9,7 @@ import io.github.t1willi.utils.Flash;
 
 @OpenApi
 public class Main extends JoltApplication {
+
     public static void main(String[] args) {
         launch(Main.class);
     }
@@ -23,7 +24,7 @@ public class Main extends JoltApplication {
         });
 
         get("/*", ctx -> {
-            Flash.error("La page demandée n'existe pas");
+            Flash.warning("La page demandée n'existe pas");
             return ctx.redirect("/");
         });
     }

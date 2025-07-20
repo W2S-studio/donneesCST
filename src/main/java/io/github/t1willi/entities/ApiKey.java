@@ -18,20 +18,16 @@ public class ApiKey {
     private int id;
     private int userId;
     private String value;
-    private int maxUsage;
     private int nbrUsage;
     private LocalDateTime lastUsage;
-    private LocalDateTime lastReset;
     private LocalDateTime createdAt;
 
     public static ApiKey of(int userId) {
         return ApiKey.builder()
                 .userId(userId)
                 .value(CryptographyUtils.randomBase64(192).substring(0, 255))
-                .maxUsage(100)
                 .nbrUsage(0)
                 .lastUsage(null)
-                .lastReset(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

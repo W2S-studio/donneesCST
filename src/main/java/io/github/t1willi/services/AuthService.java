@@ -1,7 +1,5 @@
 package io.github.t1willi.services;
 
-import java.util.Optional;
-
 import io.github.t1willi.brokers.UserBroker;
 import io.github.t1willi.entities.User;
 import io.github.t1willi.form.Form;
@@ -11,94 +9,122 @@ import io.github.t1willi.interfaces.IAuthService;
 import io.github.t1willi.interfaces.IAuthValidator;
 import io.github.t1willi.security.cryptography.Cryptography;
 
+import java.util.Optional;
+
 @Bean
 public class AuthService implements IAuthService {
 
     @Autowire
-    private IAuthValidator _authValidator;
+    private IAuthValidator authValidator;
+
+    @Autowire
+    private UserBroker userBroker;
 
     @Override
     public User authenticate(Form form) {
-        // Validate the form
-        if (!_authValidator.validateAuthentication(form)) {
+        if (!authValidator.validateAuthentication(form)) {
             return null;
         }
 
-        // Authenticate the user
-        Optional<User> user = new UserBroker().findByEmail(Cryptography.encrypt(form.field("email").get()));
+        String email = form.field("email").get();
+        String password = form.field("password").get();
+        Optional<User> user = userBroker.findByHashEmail(Cryptography.hmac(email));
 
-        if (user.isPresent()) {
-            if (Cryptography.verify(user.get().getPassword(), form.field("password").get())) {
-                return decrypt(user.get());
-            }
+        if (user.isPresent() && Cryptography.verify(user.get().getPassword(), password)) {
+            return decrypt(user.get());
         }
-        form.addError("email", "Le email ou le mot de passe est incorrect");
+
+        form.addError("email", "L'email ou le mot de passe est incorrect.");
         return null;
     }
 
     @Override
     public User register(Form form) {
-        // Validate the form
-        if (!_authValidator.validateRegistration(form)) {
+        if (!authValidator.validateRegistration(form)) {
             return null;
         }
 
-        // Verify if the email is already used
-        Optional<User> user = new UserBroker().findByEmail(Cryptography.encrypt(form.field("email").get()));
-        if (user.isPresent()) {
-            form.addError("email", "L'adresse email est déjà utilisée");
+        String email = form.field("email").get();
+        Optional<User> existingUser = userBroker.findByHashEmail(Cryptography.hmac(email));
+        if (existingUser.isPresent()) {
+            form.addError("email", "L'adresse email est déjà utilisée.");
             return null;
         }
 
-        // Create a new user
-        User userToCreate = User.of(form.field("username").get(), form.field("email").get(),
-                Cryptography.hash(form.field("password").get()));
-        new UserBroker().save(encrypt(userToCreate));
-        return decrypt(userToCreate);
+        User userToCreate = User.of(
+                form.field("username").get(),
+                email,
+                Cryptography.hmac(email),
+                Cryptography.hash(form.field("password").get()),
+                Boolean.parseBoolean(form.field("has_accepted_tos").get()));
+        User encrypted = encrypt(userToCreate);
+        userBroker.save(encrypted);
+        return decrypt(encrypted);
+    }
 
+    @Override
+    public boolean isEmailValidated(int userId) {
+        return userBroker.isEmailValidated(userId);
     }
 
     @Override
     public boolean updateEmail(int userId, Form form) {
-        // Validate the form
-        if (!_authValidator.validateEmailUpdate(form)) {
+        if (!authValidator.validateEmailUpdate(form)) {
             return false;
         }
 
-        // Find the user
-        Optional<User> user = new UserBroker().findById(userId);
+        Optional<User> user = userBroker.findById(userId);
         if (user.isPresent()) {
-            user.get().setEmail(Cryptography.encrypt(form.field("email").get()));
-            new UserBroker().save(user.get());
+            String newEmail = form.field("email").get();
+            user.get().setEmail(Cryptography.encrypt(newEmail));
+            user.get().setHashEmail(Cryptography.hmac(newEmail));
+            userBroker.save(user.get());
             return true;
         }
 
-        form.addError("email", "Il y a eu une erreur lors de la mise à jour de l'email.");
+        form.addError("email", "Erreur lors de la mise à jour de l'email.");
+        return false;
     }
 
     @Override
     public boolean updatePassword(int userId, Form form) {
-        // Validate the form
-        if (!_authValidator.validatePasswordUpdate(form)) {
+        if (!authValidator.validatePasswordUpdate(form)) {
             return false;
         }
 
+        Optional<User> user = userBroker.findById(userId);
+        if (user.isPresent()) {
+            String currentPassword = form.field("current_password").get();
+            if (!Cryptography.verify(user.get().getPassword(), currentPassword)) {
+                form.addError("current_password", "Le mot de passe actuel est incorrect.");
+                return false;
+            }
+
+            user.get().setPassword(Cryptography.hash(form.field("new_password").get()));
+            userBroker.save(user.get());
+            return true;
+        }
+
+        form.addError("password", "Erreur lors de la mise à jour du mot de passe.");
+        return false;
     }
 
     private User encrypt(User user) {
-        return new User(
+        return User.of(
                 user.getId(),
                 Cryptography.encrypt(user.getUsername()),
                 Cryptography.encrypt(user.getEmail()),
+                user.getHashEmail(),
                 user.getPassword(),
                 user.getCreatedAt());
     }
 
     private User decrypt(User user) {
-        return new User(
+        return User.of(
                 user.getId(),
                 Cryptography.decrypt(user.getUsername()),
                 Cryptography.decrypt(user.getEmail()),
+                user.getHashEmail(),
                 user.getPassword(),
                 user.getCreatedAt());
     }

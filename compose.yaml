@@ -17,8 +17,11 @@ services:
       - ./pom.xml:/workspace/pom.xml
       - ./certs:/app/tmp/tomcat/certs:ro
       - maven-repo:/workspace/.m2
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
       - MAVEN_OPTS=-Dmaven.repo.local=/workspace/.m2
+      - TZ=America/Montreal
     develop:
       watch:
         - action: rebuild
@@ -38,11 +41,15 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: jolt_db
+      TZ: America/Montreal
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command: postgres -c timezone=America/Montreal
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d jolt_db" ]
       interval: 10s

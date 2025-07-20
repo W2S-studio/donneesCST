@@ -4,12 +4,13 @@ import io.github.t1willi.entities.User;
 import io.github.t1willi.form.Form;
 
 public interface IAuthService {
+    User authenticate(Form form);
 
-    public User authenticate(Form form);
+    User register(Form form);
 
-    public User register(Form form);
+    boolean isEmailValidated(int userId);
 
-    public boolean updateEmail(int userId, Form form);
+    boolean updateEmail(int userId, Form form);
 
-    public boolean updatePassword(int userId, Form form);
+    boolean updatePassword(int userId, Form form);
 }

@@ -13,7 +13,7 @@
     <maven.compiler.target>21</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.class>io.github.t1willi.Main</main.class>
-    <jolt.version>3.0.2</jolt.version>
+    <jolt.version>3.0.8.3</jolt.version>
   </properties>
 
   <dependencies>
@@ -21,6 +21,16 @@
       <groupId>io.github.t1willi</groupId>
       <artifactId>jolt</artifactId>
       <version>${jolt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
+      <version>1.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.eatthepath</groupId>
+      <artifactId>java-otp</artifactId>
+      <version>0.4.0</version>
     </dependency>
   </dependencies>
 

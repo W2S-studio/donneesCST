@@ -20,10 +20,22 @@ public class Log {
     private String ipAddress;
     private LocalDateTime timestamp;
 
-    public static Log of(int userId, String action) {
+    public static Log of(int userId, String action, String userAgent, String ipAddress) {
         return builder()
                 .userId(userId)
                 .action(action)
+                .userAgent(userAgent)
+                .ipAddress(ipAddress)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    public static Log of(String action, String userAgent, String ipAddress) {
+        return builder()
+                .action(action)
+                .userAgent(userAgent)
+                .ipAddress(ipAddress)
+                .timestamp(LocalDateTime.now())
                 .build();
     }
 }
