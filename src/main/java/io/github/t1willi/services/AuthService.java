@@ -68,25 +68,6 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public boolean updateEmail(int userId, Form form) {
-        if (!authValidator.validateEmailUpdate(form)) {
-            return false;
-        }
-
-        Optional<User> user = userBroker.findById(userId);
-        if (user.isPresent()) {
-            String newEmail = form.field("email").get();
-            user.get().setEmail(Cryptography.encrypt(newEmail));
-            user.get().setHashEmail(Cryptography.hmac(newEmail));
-            userBroker.save(user.get());
-            return true;
-        }
-
-        form.addError("email", "Erreur lors de la mise à jour de l'email.");
-        return false;
-    }
-
-    @Override
     public boolean updatePassword(int userId, Form form) {
         if (!authValidator.validatePasswordUpdate(form)) {
             return false;

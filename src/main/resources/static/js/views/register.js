@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? 'Doit contenir 8+ caractères, une maj, une min, un chiffre & un spécial.'
                     : !req.test(pwd)
                         ? 'Le mot de passe ne respecte pas les exigences minimales.'
-                        : 'Mot de passe valide ! Pour plus de sécurité, allongez-le.'
+                        : 'Mot de passe valide ! Pour plus de sécurité, allongez-le.'
             });
         }
     }
@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     email.addEventListener('input', () => {
-        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
+        const emailRegex = /^[^\s@]+@cegepst\.qc\.ca$/;
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value) && emailRegex.test(email.value);
         email.classList.toggle('is-valid', ok);
         email.classList.toggle('is-invalid', !ok);
     });

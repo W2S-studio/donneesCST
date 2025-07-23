@@ -8,7 +8,5 @@ public interface IAuthValidator {
 
     public boolean validateRegistration(Form form);
 
-    public boolean validateEmailUpdate(Form form);
-
     public boolean validatePasswordUpdate(Form form);
 }

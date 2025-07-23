@@ -10,7 +10,5 @@ public interface IAuthService {
 
     boolean isEmailValidated(int userId);
 
-    boolean updateEmail(int userId, Form form);
-
     boolean updatePassword(int userId, Form form);
 }

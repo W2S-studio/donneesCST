@@ -68,6 +68,13 @@ CREATE TABLE logs (
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE user_support_ticket (
+    id SERIAL PRIMARY KEY,
+    ip_address VARCHAR(255) NOT NULL,
+    user_agent VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- INDEXES
 
 CREATE UNIQUE INDEX idx_mfa_user_totp ON mfa (user_id) WHERE type = 'totp_secret';

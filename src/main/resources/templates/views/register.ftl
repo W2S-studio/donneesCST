@@ -63,7 +63,7 @@
                     data-bs-toggle="tooltip"
                     data-bs-placement="right"
                     data-bs-trigger="focus"
-                    title="Entrez une adresse email valide (ex. utilisateur@cegep-st.qc.ca)"
+                    title="Entrez une adresse email valide du cégep (ex. 1234567@cegepst.qc.ca)"
                   >
                   <#if errors?? && errors.email??>
                     <div class="invalid-feedback">
@@ -133,7 +133,7 @@
                   >
                   <label for="has_accepted_tos" class="form-check-label">
                     J'accepte les
-                    <a href="/terms" class="text-decoration-none" target="_blank">
+                    <a href="/terms" class="text-decoration-none" target="_self">
                       conditions d'utilisation
                     </a>
                   </label>
@@ -144,9 +144,16 @@
                   </#if>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg w-100">
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="registerSubmitBtn">
                   S'inscrire
                 </button>
+                  <script nonce="${nonce()}" >
+                      document.getElementById('registerSubmitBtn').addEventListener('submit', function(e) {
+                          const submitBtn = document.getElementById('verificationSubmitBtn');
+                          submitBtn.disabled = true;
+                          submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Envoi en cours...';
+                      });
+                  </script>
               </form>
 
               <div class="text-center mt-4">
