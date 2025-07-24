@@ -24,7 +24,6 @@
                             </#if>
 
                             <form id="resetPasswordForm"
-                                  action="/auth/reset-password"
                                   method="POST"
                                   novalidate>
                                 <input type="hidden" name="token" value="${token}" />

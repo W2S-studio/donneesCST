@@ -23,7 +23,7 @@
                                 </div>
                             </#if>
 
-                            <form id="loginForm" action="/auth/login" method="POST">
+                            <form id="loginForm" method="POST">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Adresse email</label>
                                     <div class="input-group has-validation">

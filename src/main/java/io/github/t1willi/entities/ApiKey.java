@@ -17,14 +17,16 @@ public class ApiKey {
 
     private int id;
     private int userId;
+    String description;
     private String value;
     private int nbrUsage;
     private LocalDateTime lastUsage;
     private LocalDateTime createdAt;
 
-    public static ApiKey of(int userId) {
+    public static ApiKey of(int userId, String description) {
         return ApiKey.builder()
                 .userId(userId)
+                .description(description)
                 .value(CryptographyUtils.randomBase64(192).substring(0, 255))
                 .nbrUsage(0)
                 .lastUsage(null)

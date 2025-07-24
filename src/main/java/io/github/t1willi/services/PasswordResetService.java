@@ -139,6 +139,6 @@ public class PasswordResetService implements IPasswordResetService {
     }
 
     private String buildResetLink(JoltContext context, String token) {
-        return Helper.getDomain(context) + "/auth/reset-password?token=" + token;
+        return Helper.getDomain(context) + "/reset-password?token=" + token;
     }
 }

@@ -20,7 +20,6 @@
                             </p>
 
                             <form id="requestResetForm"
-                                  action="/auth/request-reset"
                                   method="POST"
                                   novalidate>
                                 <div class="mb-3 has-validation">

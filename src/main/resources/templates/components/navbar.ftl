@@ -40,7 +40,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/auth/logout">
+                        <a class="nav-link" href="/logout">
                             <i class="bi bi-box-arrow-right"></i> Se déconnecter
                         </a>
                     </li>

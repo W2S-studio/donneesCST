@@ -17,46 +17,36 @@
                     <h1 class="display-4 fw-bold mb-3">Tableau de bord</h1>
                     <p class="lead">Gérez vos clés API et surveillez votre utilisation avec DonnéesCST</p>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="dashboard-overview py-5">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="card h-100 shadow-sm stat-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-calendar-check fs-1" style="color: var(--cegep-water);"></i>
-                            <h3 class="mt-3">1,847</h3>
-                            <p class="text-muted">Utilisation mensuelle</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 shadow-sm stat-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-clock-fill fs-1" style="color: var(--cegep-water);"></i>
-                            <h3 class="mt-3">73</h3>
-                            <p class="text-muted">Utilisation quotidienne</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 shadow-sm stat-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-key-fill fs-1" style="color: var(--cegep-water);"></i>
-                            <h3 class="mt-3">5</h3>
-                            <p class="text-muted">Clés API actives</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card h-100 shadow-sm stat-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-shield-check fs-1" style="color: var(--cegep-water);"></i>
-                            <h3 class="mt-3">99.8%</h3>
-                            <p class="text-muted">Disponibilité</p>
+                 <div class="dashboard-overview py-5 mt-5">
+                    <div class="container">
+                        <div class="row g-5">
+                            <div class="col-md-4">
+                                <div class="card h-100 shadow-sm stat-card">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-calendar-check fs-1"></i>
+                                        <h3 class="mt-3">1,847</h3>
+                                        <p class="text-muted">Utilisation mensuelle</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 shadow-sm stat-card">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-clock-fill fs-1"></i>
+                                        <h3 class="mt-3">73</h3>
+                                        <p class="text-muted">Utilisation quotidienne</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 shadow-sm stat-card">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-key-fill fs-1"></i>
+                                        <h3 class="mt-3">5</h3>
+                                        <p class="text-muted">Clés API actives</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

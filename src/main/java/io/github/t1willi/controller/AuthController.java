@@ -25,7 +25,7 @@ import io.github.t1willi.interfaces.ISessionService;
 import io.github.t1willi.template.JoltModel;
 import io.github.t1willi.utils.Flash;
 
-@Controller("/auth")
+@Controller
 public class AuthController extends MvcController {
 
     @Autowire
@@ -50,7 +50,7 @@ public class AuthController extends MvcController {
 
         if (!authService.isEmailValidated(user.getId())) {
             Flash.error("Veuillez vérifier votre email pour pouvoir vous connecter.");
-            return render("views/login", JoltModel.of("formData", form.buildModel()));
+            return redirect("/login");
         }
 
         sessionService.createUserSession(user);
@@ -163,22 +163,15 @@ public class AuthController extends MvcController {
 
     @Post("/request-reset")
     public ResponseEntity<?> requestReset(@ToForm Form form) {
-        boolean emailSent = false;
         try {
-            emailSent = passwordResetService.sendPasswordResetEmail(form, context);
+            passwordResetService.sendPasswordResetEmail(form, context);
         } catch (Exception e) {
             Flash.error("Erreur lors de l'envoi de l'email de réinitialisation : " + e.getMessage());
-            return render("views/request_password_reset",
-                    JoltModel.of("errors", form.allErrors(), "formData", form.buildModel()));
+            return redirect("/request-reset");
         }
 
-        if (emailSent) {
-            Flash.success("Un lien de réinitialisation de mot de passe vous a été envoyé.");
-            return redirect("/login");
-        } else {
-            return render("views/request_password_reset",
-                    JoltModel.of("errors", form.allErrors(), "formData", form.buildModel()));
-        }
+        Flash.success("Un lien de réinitialisation de mot de passe vous a été envoyé.");
+        return redirect("/login");
     }
 
     @Get("/reset-password")

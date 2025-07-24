@@ -378,7 +378,6 @@
             <div class="form-body">
               <form
                 id="supportForm"
-                action="/support"
                 method="POST"
                 enctype="multipart/form-data"
               >

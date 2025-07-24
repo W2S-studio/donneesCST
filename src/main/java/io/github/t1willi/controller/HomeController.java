@@ -40,11 +40,6 @@ public class HomeController extends MvcController {
 
     @Get("/request-verification")
     public ResponseEntity<ModelView> requestVerification() {
-        String userId = Session.get("userId");
-        if (userId != null) {
-            return render("views/request_verification",
-                    JoltModel.of("email", Session.get("email"), "formData", new HashMap<String, String>()));
-        }
         return render("views/request_verification", JoltModel.of("formData", new HashMap<String, String>()));
     }
 
@@ -52,6 +47,6 @@ public class HomeController extends MvcController {
     public ResponseEntity<?> showRequestResetForm() {
         return render(
                 "views/request_password_reset",
-                JoltModel.of("formData", new java.util.HashMap<String, String>()));
+                JoltModel.of("formData", new HashMap<String, String>()));
     }
 }

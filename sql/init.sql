@@ -53,6 +53,7 @@ CREATE TABLE user_mfa_settings (
 CREATE TABLE apikey (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users (id) NOT NULL,
+    description TEXT NOT NULL,
     value VARCHAR(255) NOT NULL UNIQUE,
     nbr_usage INT NOT NULL DEFAULT 0,
     last_usage TIMESTAMP,

@@ -29,9 +29,7 @@ public class AuthValidator implements IAuthValidator {
 
                 form.field("email")
                                 .required("Votre adresse e-mail est obligatoire.")
-                                .email("Votre adresse e-mail n'est pas valide.")
-                                .regex("^[a-zA-Z0-9._%+-]+@cegepst\\.qc\\.ca$",
-                                                "Votre adresse e-mail doit être un email valide se terminant par @cegepst.qc.ca.");
+                                .email("Votre adresse e-mail n'est pas valide.");
 
                 form.field("password")
                                 .required("Votre mot de passe est obligatoire.")

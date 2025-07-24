@@ -25,7 +25,7 @@
                 </div>
               </#if>
 
-              <form id="registerForm" action="/auth/register" method="POST">
+              <form id="registerForm" method="POST">
                 <!-- Username -->
                 <div class="mb-3 has-validation">
                   <label for="username" class="form-label">Nom d'utilisateur</label>
@@ -63,7 +63,7 @@
                     data-bs-toggle="tooltip"
                     data-bs-placement="right"
                     data-bs-trigger="focus"
-                    title="Entrez une adresse email valide du cégep (ex. 1234567@cegepst.qc.ca)"
+                    title="Entrez une adresse email valide"
                   >
                   <#if errors?? && errors.email??>
                     <div class="invalid-feedback">

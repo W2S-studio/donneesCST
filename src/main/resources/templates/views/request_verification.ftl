@@ -29,7 +29,7 @@
                                 </div>
                             </#if>
 
-                            <form id="requestVerificationForm" action="/auth/request-verification" method="POST">
+                            <form id="requestVerificationForm" method="POST">
                                 <#if !email??>
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Adresse email</label>

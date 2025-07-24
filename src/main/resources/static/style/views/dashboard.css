@@ -46,7 +46,7 @@
 }
 
 .dashboard-overview {
-    background-color: #f8f9fa;
+    background-color: transparent;
     padding: 4rem 0;
 }
 
@@ -61,6 +61,10 @@
 .stat-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(43, 95, 107, 0.15);
+}
+
+.dashboard-overview .stat-card i.bi:first-child {
+    color: var(--cegep-water);
 }
 
 .usage-limits .card {
@@ -107,7 +111,6 @@
 }
 
 .dashboard-sections .card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(43, 95, 107, 0.15);
 }
 
@@ -145,7 +148,6 @@
 }
 
 .usage-analytics .card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(43, 95, 107, 0.15);
 }
 

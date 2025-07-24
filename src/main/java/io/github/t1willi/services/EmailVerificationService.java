@@ -156,6 +156,6 @@ public class EmailVerificationService implements IEmailVerificationService {
     }
 
     private String buildVerificationLink(JoltContext context, String token) {
-        return Helper.getDomain(context) + "/auth/verify-email?token=" + token;
+        return Helper.getDomain(context) + "/verify-email?token=" + token;
     }
 }
